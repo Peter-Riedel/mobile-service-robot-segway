@@ -9,9 +9,9 @@
 
 #include "debug.h"
 
-static bool check_pressed();
+static bool checkPressed();
 
-void print_sensor(uint8_t sn) {
+void printSensor(uint8_t sn) {
     char s[256];
     uint32_t n;
     int val;
@@ -36,18 +36,36 @@ void print_sensor(uint8_t sn) {
             for (uint32_t j = 0; j < n; j++)
                 printf("                 ");
             fflush(stdout);
-            if (check_pressed()) break;
+            if (checkPressed()) break;
             Sleep(200);
         }
     }
     printf("\n");
 }
 
-void print_motor(uint8_t sn) {
+const char* getSensorName(uint32_t sensor_type) {
+	switch (sensor_type) {
+		case LEGO_EV3_US: return "Ultrasound";
+		case LEGO_EV3_GYRO: return "Gyro";
+		case LEGO_EV3_COLOR: return "Color";
+		case LEGO_EV3_TOUCH: return "Touch";
+		default: return "Unknown";
+	}
 }
 
-static bool check_pressed() {
-    int val;
+// TODO: implement motor debug
+void printMotor(uint8_t sn) {
+}
 
-    return ev3_read_keys((uint8_t*) &val) && (val & EV3_KEY_UP);
+// TODO: return motor names as string
+const char* getMotorName(uint32_t motor_type) {
+	switch (motor_type) {
+		default: return "Unknown";
+	}
+}
+
+static bool checkPressed() {
+    uint8_t val;
+
+    return ev3_read_keys(&val) && (val & EV3_KEY_UP || val & EV3_KEY_DOWN || val & EV3_KEY_LEFT || val & EV3_KEY_RIGHT || val & EV3_KEY_CENTER || val & EV3_KEY_BACK);
 }

@@ -24,6 +24,7 @@ typedef enum {
 } cmd_t;
 
 static sensors_t sensors;
+static motors_t motors;
 static bool debug;
 
 static void init();
@@ -84,21 +85,33 @@ static void init() {
 	// SENSORS
 	ev3_sensor_init();
 	uint8_t *sn = (uint8_t*) &sensors;
+	
+	/* TESTEN: Vereinfachter Init für Sensoren
+	for (uint8_t *sn = (uint8_t) &sensors, sensor_type = (uint8_t) LEGO_EV3_US; sensor_type <= LEGO_EV3_TOUCH; sn++, sensor_type++) {
+		if (!ev3_search_sensor(sensor_type, sn, 0)) {
+			printf("Error: %s sensor not found\n", getSensorName(sensor_type));
+			error = true;
+		} else if (debug) {
+			printSensor(*sn);
+			Sleep(500);
+		}
+	}
+	*/
+
+	if (!ev3_search_sensor(LEGO_EV3_US, sn, 0)) {
+		printf("Error: Ultrasonic sensor not found\n");
+		error = true;
+	} else if (debug) {
+		printSensor(*sn);
+		Sleep(500);
+	}
+	sn++;
 
 	if (!ev3_search_sensor(LEGO_EV3_GYRO, sn, 0)) {
 		printf("Error: Gyro sensor not found\n");
 		error = true;
 	} else if (debug) {
-		print_sensor(*sn);
-		Sleep(500);
-	}
-	sn++;
-
-	if (!ev3_search_sensor(LEGO_EV3_US, sn, 0)) {
-		printf("Error: Ultrasound sensor not found\n");
-		error = true;
-	} else if (debug) {
-		print_sensor(*sn);
+		printSensor(*sn);
 		Sleep(500);
 	}
 	sn++;
@@ -107,7 +120,7 @@ static void init() {
 		printf("Error: Color sensor not found\n");
 		error = true;
 	} else if (debug) {
-		print_sensor(*sn);
+		printSensor(*sn);
 		Sleep(500);
 	}
 	sn++;
@@ -117,17 +130,30 @@ static void init() {
 		printf("Error: Touch sensor not found\n");
 		error = true;
 	} else if (debug) {
-		print_sensor(*sn);
+		printSensor(*sn);
 		Sleep(500);
 	}
 
 	// MOTORS
-	//...
+	
+	/* TODO und TESTEN: analog zu Sensoren Init für Motoren
+	for (uint8_t *sn = (uint8_t) &motors, motor_type = ?; motor_type <= ?; sn++, motor_type++) {
+		if (!ev3_search_motor(motor_type, sn, 0)) {
+			printf("Error: %s motor not found\n", getMotorName(motor_type));
+			error = true;
+		} else if (debug) {
+			printMotor(*sn);
+			Sleep(500);
+		}
+	}
+	*/
 
 	if (error) {
 		printf("Failed initialization: Robot is inoperative\n");
 		exit(EXIT_FAILURE);
 	}
+	
+	// TODO: coroutine for driving/standing (parallel to main process)
 }
 
 static cmd_t getCommand(const char *input) {

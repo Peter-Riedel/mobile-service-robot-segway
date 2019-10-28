@@ -31,8 +31,10 @@ void search(sensors_t *sensors) {
 	printf("search barrels...\n");
 	num_barrels = 0;
 
-	// memorize and identify barrels
 	do {
+		// TODO: implement detection of barrels with US sensor
+		
+		// memorize and identify barrels
 		color_t color;
 		if (get_sensor_value(0, sensors->sn_color, (int*) &color)) {
 			if (isBarrelColor(color) && !foundBarrel(color)) {
