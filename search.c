@@ -34,7 +34,6 @@ void search(sensors_t *sensors) {
 	do {
 		// TODO: implement detection of barrels with US sensor
 		
-		
 		// memorize and identify barrels
 		color_t color;
 		if (get_sensor_value(0, sensors->sn_color, (int*) &color)) {
