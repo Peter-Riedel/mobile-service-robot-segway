@@ -53,7 +53,7 @@ const char* getSensorName(uint32_t sensor_type) {
 	}
 }
 
-// TODO: implement motor debug
+// TODO: implement motor debug & print info
 void printMotor(uint8_t sn) {
 }
 
