@@ -137,6 +137,7 @@ static void init() {
 	// MOTORS
 	
 	/* TODO und TESTEN: analog zu Sensoren Init für Motoren
+	
 	for (uint8_t *sn = (uint8_t) &motors, motor_type = ?; motor_type <= ?; sn++, motor_type++) {
 		if (!ev3_search_motor(motor_type, sn, 0)) {
 			printf("Error: %s motor not found\n", getMotorName(motor_type));
