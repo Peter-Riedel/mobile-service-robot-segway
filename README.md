@@ -1,22 +1,24 @@
 # Miniprojekt: Mobile Service-Roboter - Segway
 Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projekt.
 
-## Setup & Konfiguration
+## ev3dev: Setup & Konfiguration
 - [Step 4: Boot ev3dev](https://www.ev3dev.org/docs/getting-started/#step-4-boot-ev3dev)
 - [Step 5: Set up a network connection](https://www.ev3dev.org/docs/networking/)
   - [Connecting to the Internet via USB](https://www.ev3dev.org/docs/tutorials/connecting-to-the-internet-via-usb/)
 - [Step 6: Connect to the EV3 via SSH](https://www.ev3dev.org/docs/tutorials/connecting-to-ev3dev-with-ssh/)
+- [Tutorials](https://www.ev3dev.org/docs/tutorials/)
+  - [Setting Up an NFS File Share](https://www.ev3dev.org/docs/tutorials/setting-up-an-nfs-file-share/)
+  - [Using Docker to Cross-Compile](https://www.ev3dev.org/docs/tutorials/using-docker-to-cross-compile/)
+  - [Using the EV3 Speaker](https://www.ev3dev.org/docs/tutorials/using-ev3-speaker/)
 
 ## Library: ev3dev-c
 - [Hauptseite](https://github.com/in4lio/ev3dev-c)
   - [Beispiele](https://github.com/in4lio/ev3dev-c/tree/master/eg)
   - [Schnittstellen / Header-Dateien](https://github.com/in4lio/ev3dev-c/tree/master/source/ev3)
 
-## Programmieren
+## Programmieren in C
 - [Programmieren in C](http://www.netzmafia.de/skripten/programmieren/index.html)
 - [C Standard Library Reference](https://www.tutorialspoint.com/c_standard_library/index.htm)
-- [Tutorials](https://www.ev3dev.org/docs/tutorials/)
-  - [Using the EV3 Speaker ](https://www.ev3dev.org/docs/tutorials/using-ev3-speaker/)
 
 ## Konstruktion & Bau
 - [Details zu Sensoren & Motoren](https://www.lego.com/de-de/themes/mindstorms)
