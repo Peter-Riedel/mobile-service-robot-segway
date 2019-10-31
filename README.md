@@ -32,7 +32,7 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
   - [Gyro Boy - Demonstration](https://www.youtube.com/watch?v=wejXE9jlszo)
 
 ## TODOs
-1. **Planung einreichen (bis 04.11.2019)**
+1. **Planung einreichen (bis 04.11.2019) per Email an Björn Zeise und Jan Michel Rotter**
 2. Programmieraufgaben:
    1. motor debug
    2. implement coroutine for standing / driving (gyro-sensor + tacho motors)
