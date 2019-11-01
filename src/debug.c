@@ -6,6 +6,7 @@
 #include "ev3.h"
 #include "ev3_port.h"
 #include "ev3_sensor.h"
+#include "ev3_tacho.h"
 
 #include "debug.h"
 
@@ -55,12 +56,38 @@ const char* getSensorName(uint32_t sensor_type) {
 
 // TODO: implement motor debug & print info
 void printMotor(uint8_t sn) {
-	
+	if(ev3_search_tacho( LEGO_EV3_M_MOTOR, &sn, 0)){
+        int max_speed;
+
+		printf( "LEGO_EV3_M_MOTOR is found, run for 5 sec...\n" );
+        get_tacho_max_speed( sn, &max_speed );
+		printf("  max_speed = %d\n", max_speed );
+		set_tacho_stop_action_inx( sn, TACHO_COAST );
+		set_tacho_speed_sp( sn, max_speed * 2 / 3 );
+        //Now the motor is rotating clockwise
+		set_tacho_time_sp( sn, 2500 );
+		set_tacho_ramp_up_sp( sn, 1000 );
+		set_tacho_ramp_down_sp( sn, 1000 );
+        set_tacho_command( sn, TACHO_RUN_TIMED);
+        sleep(100);
+        //The motor should reverse itself
+        set_tacho_polarity( sn, TACHO_INVERSED);
+        set_tacho_time_sp( sn, 2500 );
+		set_tacho_ramp_up_sp( sn, 1000 );
+		set_tacho_ramp_down_sp( sn, 1000 );
+        set_tacho_command( sn, TACHO_RUN_TIMED);
+        sleep(100);
+    } else {
+		printf( "LEGO_EV3_M_MOTOR is NOT found\n" );
+	}
+
 }
 
 // TODO: return motor names as string
 const char* getMotorName(uint32_t motor_type) {
 	switch (motor_type) {
+        case LEGO_EV3_M_MOTOR: return "Central Motor";
+        case LEGO_EV3_L_MOTOR: return "Leg Motors";
 		default: return "Unknown";
 	}
 }
