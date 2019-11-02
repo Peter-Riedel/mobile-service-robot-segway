@@ -27,6 +27,7 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
   - [Color Sensor (Part 1)](https://www.youtube.com/watch?v=if1yk4WiaiQ)
   - [Color Sensor (Part 2)](https://www.youtube.com/watch?v=IplkMchOabc)
   - [Touch Sensor](https://www.youtube.com/watch?v=FN4VSRGu9_E)
+  - [Motors/Output Devices](http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/motors.html)
 - Ideen:
   - [Gyro Boy - Bauanleitung](https://www.youtube.com/watch?v=zDjWz4jC59s)
   - [Gyro Boy - Demonstration](https://www.youtube.com/watch?v=wejXE9jlszo)
