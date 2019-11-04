@@ -1,4 +1,4 @@
-# Miniprojekt: Mobile Service-Roboter - Segway
+# Miniprojekt: Mobile Serviceroboter - Segway
 Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projekt.
 
 ## ev3dev: Setup & Konfiguration
@@ -19,6 +19,7 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
 ## Programmieren in C
 - [Programmieren in C](http://www.netzmafia.de/skripten/programmieren/index.html)
 - [C Standard Library Reference](https://www.tutorialspoint.com/c_standard_library/index.htm)
+- [C Operator Precedence](https://en.cppreference.com/w/c/language/operator_precedence)
 
 ## Konstruktion & Bau
 - [Details zu Sensoren & Motoren](https://www.lego.com/de-de/themes/mindstorms)
@@ -29,10 +30,12 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
   - [Touch Sensor](https://www.youtube.com/watch?v=FN4VSRGu9_E)
   - [Motors/Output Devices](http://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-jessie/motors.html)
 - Ideen:
-  - [Gyro Boy - Bauanleitung](https://www.youtube.com/watch?v=zDjWz4jC59s)
+  - [Gyroboy - LEGO Bauanleitung/Programm](https://education.lego.com/de-de/support/mindstorms-ev3/building-instructions)
+  - [Gyro Boy - Bauanleitung Video](https://www.youtube.com/watch?v=zDjWz4jC59s)
   - [Gyro Boy - Demonstration](https://www.youtube.com/watch?v=wejXE9jlszo)
 
-## Projektmanagement & Dokumentation
+## Organisation, Projektmanagement & Dokumentation
+- [HWP-Organisation](https://www.rts.uni-hannover.de/hardware-praktikum.html)
 - [Planungsbericht](https://docs.google.com/document/d/1sjeMU0MUyPgONYtCPvdBn302_mGfXfadqg5RrM-YUDw/edit#)
 
 ## TODOs
