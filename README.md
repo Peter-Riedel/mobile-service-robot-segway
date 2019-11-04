@@ -37,6 +37,7 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
 ## Organisation, Projektmanagement & Dokumentation
 - [HWP-Organisation](https://www.rts.uni-hannover.de/hardware-praktikum.html)
 - [Planungsbericht](https://docs.google.com/document/d/1sjeMU0MUyPgONYtCPvdBn302_mGfXfadqg5RrM-YUDw/edit#)
+- [Zwischenbericht](https://docs.google.com/document/d/1phoVBbzhPNEXXPS0ydyNqGvqzezOQUp-SsG8JKKY8f0/edit)
 
 ## TODOs
 1. Programmieraufgaben:
