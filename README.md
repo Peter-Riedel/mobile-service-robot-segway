@@ -32,10 +32,12 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
   - [Gyro Boy - Bauanleitung](https://www.youtube.com/watch?v=zDjWz4jC59s)
   - [Gyro Boy - Demonstration](https://www.youtube.com/watch?v=wejXE9jlszo)
 
+## Projektmanagement & Dokumentation
+- [Planungsbericht](https://docs.google.com/document/d/1sjeMU0MUyPgONYtCPvdBn302_mGfXfadqg5RrM-YUDw/edit#)
+
 ## TODOs
-1. **Planung einreichen (bis 04.11.2019) per Email an Björn Zeise und Jan Michel Rotter**
-2. Programmieraufgaben:
-   1. motor debug
-   2. implement coroutine for standing / driving (gyro-sensor + tacho motors)
-   3. implement detection of barrels by ultrasonic sensor
-3. Konstruktion / Bau ...
+1. Programmieraufgaben:
+   1. implement detection of barrels by ultrasonic sensor
+   2. implement driving/turning
+   3. implement coroutines to balance roboter by gyro sensor
+2. Konstruktion / Bau ...
