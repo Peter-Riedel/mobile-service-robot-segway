@@ -41,7 +41,6 @@ Hier findet ihr eine Zusammenfassung wichtiger Links und Quellen für das Projek
 
 ## TODOs
 1. Programmieraufgaben:
-   1. implement detection of barrels by ultrasonic sensor
-   2. implement driving/turning
-   3. implement coroutines to balance roboter by gyro sensor
+   1. implement coroutines to balance roboter by gyro sensor
+   2. implement detection of barrels by ultrasonic sensor
 2. Konstruktion / Bau ...
