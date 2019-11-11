@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include <unistd.h>
-#define Sleep(msec) usleep(msec * 1000)
 
 #include "ev3.h"
 #include "ev3_port.h"
@@ -28,7 +26,7 @@ void printSensor(uint8_t sn) {
             for (uint32_t i = 0; i < n; i++) {
                 if (get_sensor_value(i, sn, &val)) {
                     if (i > 0) printf(", ");
-                    printf("value%d = %d", i, val);
+                    printf("value%d = %6d", i, val);
                 }
             }
             fflush(stdout);
@@ -54,46 +52,80 @@ const char* getSensorName(uint32_t sensor_type) {
 	}
 }
 
-// TODO: implement motor debug & print info
 void printMotor(uint8_t sn) {
-	if(ev3_search_tacho( LEGO_EV3_M_MOTOR, &sn, 0)){
-        int max_speed;
+	char s[256];
+	int val;
 
-		printf( "LEGO_EV3_M_MOTOR is found, run for 5 sec...\n" );
-        get_tacho_max_speed( sn, &max_speed );
-		printf("  max_speed = %d\n", max_speed );
-		set_tacho_stop_action_inx( sn, TACHO_COAST );
-		set_tacho_speed_sp( sn, max_speed * 2 / 3 );
-        //Now the motor is rotating clockwise
-		set_tacho_time_sp( sn, 2500 );
-		set_tacho_ramp_up_sp( sn, 1000 );
-		set_tacho_ramp_down_sp( sn, 1000 );
-        set_tacho_command( sn, TACHO_RUN_TIMED);
-        sleep(100);
-        //The motor should reverse itself
-        set_tacho_polarity( sn, TACHO_INVERSED);
-        set_tacho_time_sp( sn, 2500 );
-		set_tacho_ramp_up_sp( sn, 1000 );
-		set_tacho_ramp_down_sp( sn, 1000 );
-        set_tacho_command( sn, TACHO_RUN_TIMED);
-        sleep(100);
-    } else {
-		printf( "LEGO_EV3_M_MOTOR is NOT found\n" );
-	}
+	if (get_tacho_driver_name(sn, s, sizeof(s)))
+		printf("  type = %s\n", s);
+	if (get_tacho_address(sn, s, sizeof(s)))
+		printf("  port = %s\n", s);
+	if (get_tacho_commands(sn, s, sizeof(s)))
+		printf("  commands = %s\n", s);
+	if (get_tacho_count_per_rot(sn, &val))
+		printf("  count_per_rot = %d\n", val);
+	if (get_tacho_count_per_m(sn, &val))
+        printf("  count_per_m = %d\n", val);
+	if (get_tacho_full_travel_count(sn, &val))
+		printf("  full_travel_count = %d\n", val);
+	if (get_tacho_duty_cycle(sn, &val))
+		printf("  duty_cycle = %d\n", val);
+    if (get_tacho_duty_cycle_sp(sn, &val))
+        printf("  duty_cycle_sp = %d\n", val);
+	if (get_tacho_hold_pid_Kd(sn, &val))
+		printf("  hold_pid_Kd = %d\n", val);
+    if (get_tacho_hold_pid_Ki(sn, &val))
+        printf("  hold_pid_Ki = %d\n", val);
+    if (get_tacho_hold_pid_Kp(sn, &val))
+        printf("  hold_pid_Kp = %d\n", val);
+	if (get_tacho_max_speed(sn, &val))
+		printf("  max_speed = %d\n", val);
+	if (get_tacho_polarity(sn, s, sizeof(s)))
+		printf("  polarity = %s\n", s);
+	if (get_tacho_position(sn, &val))
+		printf("  position = %d\n", val);
+	if (get_tacho_position_sp(sn, &val))
+		printf("  position_sp = %d\n", val);
+	if (get_tacho_ramp_down_sp(sn, &val))
+		printf("  ramp_down_sp = %d\n", val);
+	if (get_tacho_ramp_up_sp(sn, &val))
+		printf("  ramp_up_sp = %d\n", val);
+	if (get_tacho_speed(sn, &val))
+		printf("  speed = %d\n", val);
+	if (get_tacho_speed_pid_Kd(sn, &val))
+		printf("  speed_pid_Kd = %d\n", val);
+	if (get_tacho_speed_pid_Ki(sn, &val))
+		printf("  speed_pid_Ki = %d\n", val);
+	if (get_tacho_speed_pid_Kp(sn, &val))
+		printf("  speed_pid_Kp = %d\n", val);
+	if (get_tacho_speed_sp(sn, &val))
+		printf("  speed_sp = %d\n", val);
+	if (get_tacho_state(sn, s, sizeof(s)))
+		printf("  state = %s\n", s);
+	if (get_tacho_stop_action(sn, s, sizeof(s)))
+		printf("  stop_action = %s\n", s);
+	if (get_tacho_stop_actions(sn, s, sizeof(s)))
+		printf("  stop_actions = %s\n", s);
+	if (get_tacho_time_sp(sn, &val))
+		printf("  time_sp = %d\n", val);
 
+	printf("\n");
 }
 
 // TODO: return motor names as string
 const char* getMotorName(uint32_t motor_type) {
+/*
 	switch (motor_type) {
         case LEGO_EV3_M_MOTOR: return "Central Motor";
         case LEGO_EV3_L_MOTOR: return "Leg Motors";
 		default: return "Unknown";
 	}
+*/
+	return "";
 }
 
 static bool checkPressed() {
     uint8_t val;
 
-    return ev3_read_keys(&val) && (val & EV3_KEY_UP || val & EV3_KEY_DOWN || val & EV3_KEY_LEFT || val & EV3_KEY_RIGHT || val & EV3_KEY_CENTER || val & EV3_KEY_BACK);
+    return ev3_read_keys(&val) && (val & EV3_KEY_UP || val & EV3_KEY_DOWN || val & EV3_KEY_LEFT || val & EV3_KEY_RIGHT);
 }

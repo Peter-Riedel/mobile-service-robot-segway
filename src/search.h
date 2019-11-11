@@ -1,16 +1,15 @@
+#ifndef SEARCH_H
+#define SEARCH_H
+
 typedef struct {
-    uint8_t sn_us;
-    uint8_t sn_gyro;
-    uint8_t sn_color;
-    uint8_t sn_touch;
+    uint8_t us;
+    uint8_t gyro;
+    uint8_t color;
+    uint8_t touch;
 } sensors_t;
 
-// TODO: edit motor types
-typedef struct {
-	uint8_t sn1;
-	uint8_t sn2;
-	uint8_t sn3;
-	uint8_t sn4;
-} motors_t;
+extern sensors_t sensors;
 
 extern void search();
+
+#endif

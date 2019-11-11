@@ -2,19 +2,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <string.h>
-#include <unistd.h>
-#define Sleep(msec) usleep(msec * 1000)
 
 // ev3dev-c lib
 #include "ev3.h"
 #include "ev3_light.h"
 #include "ev3_port.h"
 #include "ev3_sensor.h"
+#include "ev3_tacho.h"
 
 // custom lib
 #include "debug.h"
 #include "search.h"
+#include "drive.h"
+
+#define L_MOTOR_PORT      OUTPUT_C
+#define L_MOTOR_EXT_PORT  EXT_PORT__NONE_
+#define R_MOTOR_PORT      OUTPUT_A
+#define R_MOTOR_EXT_PORT  EXT_PORT__NONE_
+sensors_t sensors;
+uint8_t motor[3] = { DESC_LIMIT, DESC_LIMIT, DESC_LIMIT };
+int max_speed;
 
 typedef enum {
 	START,
@@ -23,12 +32,14 @@ typedef enum {
 	UNKNOWN
 } cmd_t;
 
-static sensors_t sensors;
-static motors_t motors;
 static bool debug;
 
 static void init();
-static cmd_t getCommand(const char *input);
+static void prompt(char *const input);
+static cmd_t getCommand(char *const input);
+static void start();
+static void printError(const char *const message);
+static void fail(const char *const message);
 
 int main(int argc, char* argv[]) {
 	if (argc >= 2) {
@@ -45,21 +56,13 @@ int main(int argc, char* argv[]) {
 	printf("  MOBILE SERVICE-ROBOTER: SEGWAY  \n");
 	printf("**********************************\n");
 
-	const char input[256];
+	char input[256];
 	do {
-		set_light(LIT_LEFT, LIT_GREEN);
-		set_light(LIT_RIGHT, LIT_GREEN);
-		printf("cmd: ");
-		scanf("%256s", input);
+		prompt(input);
 
 		switch (getCommand(input)) {
 			case START:
-				set_light(LIT_LEFT, LIT_OFF);
-				set_light(LIT_RIGHT, LIT_OFF);
-				set_light_blink(LIT_LEFT, LIT_AMBER, 500, 500);
-				Sleep(500);
-				set_light_blink(LIT_RIGHT, LIT_AMBER, 500, 500);
-				search(&sensors);
+				start();
 				break;
 			case EXIT:
 				ev3_uninit();
@@ -67,97 +70,139 @@ int main(int argc, char* argv[]) {
 			case POWEROFF:
 				ev3_poweroff();
 			default:
-				set_light(LIT_LEFT, LIT_RED);
-				set_light(LIT_RIGHT, LIT_RED);
-				printf("Error: Unknown command\n");
+				printError("Unknown command");
 		}
 	} while (true);
 }
 
 static void init() {
-	if (ev3_init() < 1) {
-		printf("Error: Unable to initialize EV3 brick\n");
-		exit(EXIT_FAILURE);
-	}
-
 	bool error = false;
 
+	if (ev3_init() < 1) {
+		fail("Unable to initialize EV3 brick");
+	}
+
+	// PORTS
+	if (ev3_port_init() != 8) {
+		fail("Unable to initialize all ports");
+	}
+
 	// SENSORS
-	ev3_sensor_init();
-	uint8_t *sn = (uint8_t*) &sensors;
-	
-	/* TESTEN: Vereinfachter Init für Sensoren
-	for (uint8_t *sn = (uint8_t) &sensors, sensor_type = (uint8_t) LEGO_EV3_US; sensor_type <= LEGO_EV3_TOUCH; sn++, sensor_type++) {
-		if (!ev3_search_sensor(sensor_type, sn, 0)) {
-			printf("Error: %s sensor not found\n", getSensorName(sensor_type));
-			error = true;
-		} else if (debug) {
-			printSensor(*sn);
-			Sleep(500);
-		}
-	}
-	*/
-
-	if (!ev3_search_sensor(LEGO_EV3_US, sn, 0)) {
-		printf("Error: Ultrasonic sensor not found\n");
+	if (ev3_sensor_init() != 4) {
+		printError("Unable to initialize all sensors");
 		error = true;
-	} else if (debug) {
-		printSensor(*sn);
-		Sleep(500);
-	}
-	sn++;
-
-	if (!ev3_search_sensor(LEGO_EV3_GYRO, sn, 0)) {
-		printf("Error: Gyro sensor not found\n");
-		error = true;
-	} else if (debug) {
-		printSensor(*sn);
-		Sleep(500);
-	}
-	sn++;
-
-	if (!ev3_search_sensor(LEGO_EV3_COLOR, sn, 0)) {
-		printf("Error: Color sensor not found\n");
-		error = true;
-	} else if (debug) {
-		printSensor(*sn);
-		Sleep(500);
-	}
-	sn++;
+	} else if (debug)
+		printf("Sensors:\n");
 
 	// touch sensor maybe not necessary --> lab test
-	if (!ev3_search_sensor(LEGO_EV3_TOUCH, sn, 0)) {
-		printf("Error: Touch sensor not found\n");
-		error = true;
-	} else if (debug) {
-		printSensor(*sn);
-		Sleep(500);
+	uint8_t *snp = (uint8_t*) &sensors;
+	for (uint32_t sensor_type = LEGO_EV3_US; sensor_type <= LEGO_EV3_TOUCH; sensor_type++) {
+		if (!ev3_search_sensor(sensor_type, snp, 0)) {
+			printf("Error: %s sensor not found\n", getSensorName(sensor_type));
+			error = true;
+		} else {
+			// Configure mode of sensor
+			uint32_t sensor_mode;
+			switch (sensor_type) {
+				case LEGO_EV3_US:
+					sensor_mode = US_US_DIST_CM; //?
+					break;
+				case LEGO_EV3_GYRO:
+					sensor_mode = GYRO_GYRO_ANG;
+					break;
+				case LEGO_EV3_COLOR:
+					sensor_mode = COLOR_COL_REFLECT;
+					break;
+				case LEGO_EV3_TOUCH:
+					sensor_mode = TOUCH_TOUCH;
+					break;
+				default:
+					// Warning
+					printError("Unknown sensor type");
+			}
+
+			if (!set_sensor_mode_inx(*snp, sensor_mode)) {
+				// Warning
+				printError("Unable to set sensor mode");
+			}
+
+			if (debug) {
+				printSensor(*snp);
+				Sleep(300);
+			}
+		}
+
+		snp++;
 	}
 
 	// MOTORS
-	
-	/* TODO und TESTEN: analog zu Sensoren Init für Motoren
-	
-	for (uint8_t *sn = (uint8_t) &motors, motor_type = ?; motor_type <= ?; sn++, motor_type++) {
-		if (!ev3_search_motor(motor_type, sn, 0)) {
-			printf("Error: %s motor not found\n", getMotorName(motor_type));
-			error = true;
-		} else if (debug) {
-			printMotor(*sn);
-			Sleep(500);
-		}
+	if (ev3_tacho_init() != 3) {
+		printError("Unable to initialize all tacho motors");
+		error = true;
+	} else if (debug)
+		printf("Motors:\n");
+/*
+	if (!ev3_search_tacho(LEGO_EV3_M_MOTOR, &motor[M], 0)) {
+		printError("Medium tacho motor not found");
+		error = true;
+	} else if (debug) {
+		printMotor(motor[M]);
+		Sleep(300);
 	}
-	*/
+*/
+
+	char port_name[5];
+	if (ev3_search_tacho_plugged_in(L_MOTOR_PORT, L_MOTOR_EXT_PORT, &motor[L], 0)) {
+		get_tacho_max_speed(motor[L], &max_speed);
+		// Reset the motor
+        set_tacho_command_inx(motor[L], TACHO_RESET);
+		//set_tacho_polarity_inx(motor[L], TACHO_INVERSED);
+		//set_tacho_stop_action_inx(motor[L], TACHO_BRAKE);
+        set_tacho_speed_pid_Kp(motor[L], 50);
+        set_tacho_speed_pid_Ki(motor[L], 60);
+        set_tacho_speed_pid_Kd(motor[L], 0);
+
+		if (debug) {
+			printMotor(motor[L]);
+			Sleep(300);
+		}
+    } else {
+        printf("Error: Left motor (%s) not found\n", ev3_port_name(L_MOTOR_PORT, L_MOTOR_EXT_PORT, 0, port_name));
+		error = true;
+    }
+
+    if (ev3_search_tacho_plugged_in(R_MOTOR_PORT, R_MOTOR_EXT_PORT, &motor[R], 0)) {
+        // Reset the motor
+        set_tacho_command_inx(motor[R], TACHO_RESET);
+		//set_tacho_stop_action_inx(motor[R], TACHO_BRAKE);
+		set_tacho_speed_pid_Kp(motor[R], 50);
+		set_tacho_speed_pid_Ki(motor[R], 60);
+		set_tacho_speed_pid_Kd(motor[R], 0);
+
+		if (debug) {
+			printMotor(motor[R]);
+			Sleep(300);
+		}
+    } else {
+        printf("Error: Right motor (%s) not found\n", ev3_port_name(R_MOTOR_PORT, R_MOTOR_EXT_PORT, 0, port_name));
+		error = true;
+    }
+
+	multi_set_tacho_command_inx(motor, TACHO_RUN_FOREVER);
 
 	if (error) {
-		printf("Failed initialization: Robot is inoperative\n");
-		exit(EXIT_FAILURE);
+		fail("Failed initialization - robot is inoperative");
 	}
-	
-	// TODO: coroutine for driving/standing (parallel to main process)
 }
 
-static cmd_t getCommand(const char *input) {
+static void prompt(char *const input) {
+	set_light(LIT_LEFT, LIT_GREEN);
+	set_light(LIT_RIGHT, LIT_GREEN);
+	printf("cmd: ");
+	scanf("%256s", input);
+}
+
+static cmd_t getCommand(char *const input) {
 	for (char *p = input; *p; p++)
 		*p = tolower(*p);
 
@@ -168,4 +213,24 @@ static cmd_t getCommand(const char *input) {
 	else if (strcmp("poweroff", input) == 0)
 		return POWEROFF;
 	else return UNKNOWN;
+}
+
+static void start() {
+	set_light(LIT_LEFT, LIT_OFF);
+	set_light(LIT_RIGHT, LIT_OFF);
+	set_light_blink(LIT_LEFT, LIT_AMBER, 500, 500);
+	Sleep(500);
+	set_light_blink(LIT_RIGHT, LIT_AMBER, 500, 500);
+	search();
+}
+
+static void printError(const char *const message) {
+	printf("Error: %s\n", message);
+}
+
+static void fail(const char *const message) {
+	set_light(LIT_LEFT, LIT_RED);
+	set_light(LIT_RIGHT, LIT_RED);
+	printError(message);
+	exit(EXIT_FAILURE);
 }
