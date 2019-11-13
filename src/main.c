@@ -158,9 +158,6 @@ static void init() {
         set_tacho_command_inx(motor[L], TACHO_RESET);
 		//set_tacho_polarity_inx(motor[L], TACHO_INVERSED);
 		//set_tacho_stop_action_inx(motor[L], TACHO_BRAKE);
-        /*set_tacho_speed_pid_Kp(motor[L], 50);
-        set_tacho_speed_pid_Ki(motor[L], 60);
-        set_tacho_speed_pid_Kd(motor[L], 0);*/
 
 		if (debug) {
 			printMotor(motor[L]);
@@ -175,9 +172,6 @@ static void init() {
         // Reset the motor
         set_tacho_command_inx(motor[R], TACHO_RESET);
 		//set_tacho_stop_action_inx(motor[R], TACHO_BRAKE);
-		/*set_tacho_speed_pid_Kp(motor[R], 50);
-		set_tacho_speed_pid_Ki(motor[R], 60);
-		set_tacho_speed_pid_Kd(motor[R], 0);*/
 
 		if (debug) {
 			printMotor(motor[R]);

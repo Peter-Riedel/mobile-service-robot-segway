@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "ev3.h"
 #include "ev3_sensor.h"
@@ -24,6 +25,7 @@ typedef enum {
 
 static move_t moving;   /* Current moving */
 static move_t command;  /* Command for the 'drive' coroutine */
+static int motor_speed_correction;
 static bool check_ground;
 static bool locate_barrel;
 static bool reset;
@@ -42,12 +44,6 @@ static bool foundBarrel(color_t color);
 static const char* getBarrelColor(color_t color);
 static void speakColor(const char *color);
 
-int gyro_angle_origin; // SOLL-Lagewinkel
-int gyro_angle_current; // IST-Lagewinkel
-int gyro_angle_diff; // Regelabweichung e(t) = IST - SOLL
-int Kp, Ki, Kd;
-int motor_speed; // Stellgroesse u(t) = Kp * e(t) + Ki * [e(t)*t]_0_? + Kd * 0
-
 CORO_DEFINE(DRIVE) {
 	CORO_LOCAL int speed_linear, speed_circular;
 	CORO_LOCAL int _wait_stopped = false;
@@ -58,13 +54,18 @@ CORO_DEFINE(DRIVE) {
 
 	for ( ; ; ) {
 		/* Waiting new command */
-		CORO_WAIT(moving != command);
+		CORO_WAIT(moving != command || command == BALANCE);
 
 		switch (command) {
 			case MOVE_NONE:
 				_stop();
 				_wait_stopped = true;
 				reset = true;
+				break;
+			case BALANCE:
+				int motor_speed_current;
+				get_tacho_speed(motor[L], &motor_speed_current);
+				_run_forever(motor_speed_current + motor_speed_correction, motor_speed_current + motor_speed_correction);
 				break;
 			case MOVE_FORWARD:
 				_run_forever(speed_linear*0.1, speed_linear*0.1);
@@ -94,21 +95,29 @@ CORO_DEFINE(DRIVE) {
 }
 
 CORO_DEFINE(BALANCE) {
+	// SOLL-Lagewinkel, IST-Lagewinkel, aktuelle Regelabweichung e(t) = IST - SOLL, vorherige Regelabweichung
+	CORO_LOCAL int gyro_angle_origin, gyro_angle_current, gyro_angle_diff = 0, gyro_angle_diff_prev;
+	CORO_LOCAL int Kp = 100, Ki = 50, Kd = -100; // constant params for PID controller
+	CORO_LOCAL time_t start_t, end_t = time(NULL); // start time, end time
+	CORO_LOCAL double diff_t; // difference between end time and start time
+	CORO_LOCAL double area = 0; // summation of integral
+	
 	CORO_BEGIN();
 	for( ; ; ) {
 		if (get_sensor_value(0, sensors.gyro, &gyro_angle_current)) {
+			gyro_angle_diff_prev = gyro_angle_diff;
 			gyro_angle_diff = gyro_angle_current - gyro_angle_origin;
 			printf("gyro_angle_diff: %d\n", gyro_angle_diff);
-
-			//	get_tacho_speed_pid_Kp(motor[L], &Kp);
-			//	get_tacho_speed_pid_Ki(motor[L], &Ki);
-			//	get_tacho_speed_pid_Kd(motor[L], &Kd);
-			//	motor_speed = Kp * gyro_angle_diff/* + Ki * ?*/ + Kd * 0;
-
-			if (gyro_angle_diff > 0)
-				command = MOVE_FORWARD;
-			else if (gyro_angle_diff < 0)
-				command = MOVE_BACKWARD;
+			
+			start_t = end_t;
+			diff_t = difftime(time(&end_t), start_t);
+			area += diff_t * (gyro_angle_diff + gyro_angle_diff_prev) / 2;
+			
+			motor_speed_correction = (int) (Kp * gyro_angle_diff +
+											Ki * area +
+											Kd * (gyro_angle_diff - gyro_angle_diff_prev) / diff_t);
+			
+			command = BALANCE;
 		}
 
 		CORO_YIELD();
@@ -148,7 +157,7 @@ CORO_DEFINE(LOCATE) {
 		get_sensor_value(0, sensors.us, &dist_current);
 
 		if (30 < dist_current && dist_current < 2550) { // between 3cm and 255cm equals possibility to find barrel
-			printf("us_dist_cm: %d\n", dist_current / 10);
+			//printf("us_dist_cm: %d\n", dist_current / 10);
 			if (dist_current < dist_median) {
 				dist_median = dist_current;
 				angle_deviant = 0;

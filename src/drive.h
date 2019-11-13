@@ -11,6 +11,7 @@ extern int max_speed;  /* Motor maximal speed */
 
 typedef enum {
     MOVE_NONE,
+	BALANCE,
     MOVE_FORWARD,
     MOVE_BACKWARD,
     TURN_LEFT,
