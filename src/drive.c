@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdbool.h>
 
 #include "ev3.h"
@@ -7,9 +6,6 @@
 #include "drive.h"
 
 //int angle;    /* Angle of rotation */
-
-//		set_sensor_mode_inx( ir, LEGO_EV3_IR_IR_PROX );
-//		set_sensor_mode_inx( ir, LEGO_EV3_IR_IR_REMOTE );
 
 void _run_forever(int l_speed, int r_speed) {
 	set_tacho_speed_sp(motor[L], l_speed);
@@ -47,17 +43,19 @@ void _run_direct(int l_speed, int r_speed) {
     multi_set_tacho_command_inx(motor, TACHO_RUN_DIRECT);
 }
 
-/*
-static int _is_running() {
+void _stop() {
+	multi_set_tacho_command_inx(motor, TACHO_STOP);
+}
+
+void _reset() {
+	multi_set_tacho_command_inx(motor, TACHO_RESET);
+}
+
+bool _is_running() {
 	FLAGS_T state = TACHO_STATE__NONE_;
 
 	if (get_tacho_state_flags(motor[L], &state) && state != TACHO_STATE__NONE_) return true;
 	if (get_tacho_state_flags(motor[R], &state) && state != TACHO_STATE__NONE_) return true;
 
 	return false;
-}
-*/
-
-void _stop() {
-	multi_set_tacho_command_inx(motor, TACHO_STOP);
 }

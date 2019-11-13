@@ -1,5 +1,5 @@
 CC     = gcc
-CFLAGS = -std=c99 -pedantic -Wall -D _BSD_SOURCE
+CFLAGS = -std=c99 -pedantic -Wall -D _BSD_SOURCE -Wno-pedantic
 LIB    = -lev3dev-c
 MAIN   = ../obj/main.o
 DEBUG  = ../obj/debug.o
@@ -10,7 +10,7 @@ RUN    = ../run
 
 run: $(RUN)
 	clear
-	sudo $(RUN) -debug
+	sudo $(RUN)
 
 $(RUN): $(OBJ)
 	$(CC) $(CFLAGS) $(LIB) -o $(RUN) $(OBJ)

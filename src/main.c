@@ -105,7 +105,7 @@ static void init() {
 			uint32_t sensor_mode;
 			switch (sensor_type) {
 				case LEGO_EV3_US:
-					sensor_mode = US_US_DIST_CM; //?
+					sensor_mode = US_US_DIST_CM;
 					break;
 				case LEGO_EV3_GYRO:
 					sensor_mode = GYRO_GYRO_ANG;
@@ -158,9 +158,9 @@ static void init() {
         set_tacho_command_inx(motor[L], TACHO_RESET);
 		//set_tacho_polarity_inx(motor[L], TACHO_INVERSED);
 		//set_tacho_stop_action_inx(motor[L], TACHO_BRAKE);
-        set_tacho_speed_pid_Kp(motor[L], 50);
+        /*set_tacho_speed_pid_Kp(motor[L], 50);
         set_tacho_speed_pid_Ki(motor[L], 60);
-        set_tacho_speed_pid_Kd(motor[L], 0);
+        set_tacho_speed_pid_Kd(motor[L], 0);*/
 
 		if (debug) {
 			printMotor(motor[L]);
@@ -175,9 +175,9 @@ static void init() {
         // Reset the motor
         set_tacho_command_inx(motor[R], TACHO_RESET);
 		//set_tacho_stop_action_inx(motor[R], TACHO_BRAKE);
-		set_tacho_speed_pid_Kp(motor[R], 50);
+		/*set_tacho_speed_pid_Kp(motor[R], 50);
 		set_tacho_speed_pid_Ki(motor[R], 60);
-		set_tacho_speed_pid_Kd(motor[R], 0);
+		set_tacho_speed_pid_Kd(motor[R], 0);*/
 
 		if (debug) {
 			printMotor(motor[R]);
@@ -187,8 +187,6 @@ static void init() {
         printf("Error: Right motor (%s) not found\n", ev3_port_name(R_MOTOR_PORT, R_MOTOR_EXT_PORT, 0, port_name));
 		error = true;
     }
-
-	multi_set_tacho_command_inx(motor, TACHO_RUN_FOREVER);
 
 	if (error) {
 		fail("Failed initialization - robot is inoperative");
