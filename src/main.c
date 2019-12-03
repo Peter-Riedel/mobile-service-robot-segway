@@ -17,13 +17,23 @@
 #include "search.h"
 #include "drive.h"
 
-#define L_MOTOR_PORT      OUTPUT_C
-#define L_MOTOR_EXT_PORT  EXT_PORT__NONE_
-#define R_MOTOR_PORT      OUTPUT_A
-#define R_MOTOR_EXT_PORT  EXT_PORT__NONE_
+// assignment of ports to motors
+#define L_MOTOR_PORT		OUTPUT_D
+#define L_MOTOR_EXT_PORT	EXT_PORT__NONE_
+#define R_MOTOR_PORT		OUTPUT_A
+#define R_MOTOR_EXT_PORT	EXT_PORT__NONE_
+#define M_MOTOR_PORT		OUTPUT_C
+#define M_MOTOR_EXT_PORT	EXT_PORT__NONE_
+
+const int L_MOTOR_MAX_SPEED = 1050;
+const int M_MOTOR_MAX_SPEED = 1560;
+
+// sensors
 sensors_t sensors;
-uint8_t motor[3] = { DESC_LIMIT, DESC_LIMIT, DESC_LIMIT };
-int max_speed;
+
+// motors
+uint8_t motor[3] = { DESC_LIMIT, DESC_LIMIT, DESC_LIMIT }; // L, R, limit
+uint8_t m_motor;
 
 typedef enum {
 	START,
@@ -94,21 +104,20 @@ static void init() {
 	} else if (debug)
 		printf("Sensors:\n");
 
-	// touch sensor maybe not necessary --> lab test
 	uint8_t *snp = (uint8_t*) &sensors;
 	for (uint32_t sensor_type = LEGO_EV3_US; sensor_type <= LEGO_EV3_TOUCH; sensor_type++) {
 		if (!ev3_search_sensor(sensor_type, snp, 0)) {
 			printf("Error: %s sensor not found\n", getSensorName(sensor_type));
 			error = true;
 		} else {
-			// Configure mode of sensor
+			// configure mode of sensor
 			uint32_t sensor_mode;
 			switch (sensor_type) {
 				case LEGO_EV3_US:
 					sensor_mode = US_US_DIST_CM;
 					break;
 				case LEGO_EV3_GYRO:
-					sensor_mode = GYRO_GYRO_ANG;
+					sensor_mode = GYRO_GYRO_G_AND_A;
 					break;
 				case LEGO_EV3_COLOR:
 					sensor_mode = COLOR_COL_REFLECT;
@@ -117,12 +126,12 @@ static void init() {
 					sensor_mode = TOUCH_TOUCH;
 					break;
 				default:
-					// Warning
+					// warning
 					printError("Unknown sensor type");
 			}
 
 			if (!set_sensor_mode_inx(*snp, sensor_mode)) {
-				// Warning
+				// warning
 				printError("Unable to set sensor mode");
 			}
 
@@ -141,50 +150,47 @@ static void init() {
 		error = true;
 	} else if (debug)
 		printf("Motors:\n");
-/*
-	if (!ev3_search_tacho(LEGO_EV3_M_MOTOR, &motor[M], 0)) {
-		printError("Medium tacho motor not found");
-		error = true;
-	} else if (debug) {
-		printMotor(motor[M]);
-		Sleep(300);
-	}
-*/
 
 	char port_name[5];
-	if (ev3_search_tacho_plugged_in(L_MOTOR_PORT, L_MOTOR_EXT_PORT, &motor[L], 0)) {
-		get_tacho_max_speed(motor[L], &max_speed);
-		// Reset the motor
-        set_tacho_command_inx(motor[L], TACHO_RESET);
-		//set_tacho_polarity_inx(motor[L], TACHO_INVERSED);
-		//set_tacho_stop_action_inx(motor[L], TACHO_BRAKE);
 
+	// left large motor
+	if (ev3_search_tacho_plugged_in(L_MOTOR_PORT, L_MOTOR_EXT_PORT, &motor[L], 0)) {
 		if (debug) {
 			printMotor(motor[L]);
 			Sleep(300);
 		}
     } else {
-        printf("Error: Left motor (%s) not found\n", ev3_port_name(L_MOTOR_PORT, L_MOTOR_EXT_PORT, 0, port_name));
+        printf("Error: Left large motor (%s) not found\n", ev3_port_name(L_MOTOR_PORT, L_MOTOR_EXT_PORT, 0, port_name));
 		error = true;
     }
 
+	// right large motor
     if (ev3_search_tacho_plugged_in(R_MOTOR_PORT, R_MOTOR_EXT_PORT, &motor[R], 0)) {
-        // Reset the motor
-        set_tacho_command_inx(motor[R], TACHO_RESET);
-		//set_tacho_stop_action_inx(motor[R], TACHO_BRAKE);
-
 		if (debug) {
 			printMotor(motor[R]);
 			Sleep(300);
 		}
     } else {
-        printf("Error: Right motor (%s) not found\n", ev3_port_name(R_MOTOR_PORT, R_MOTOR_EXT_PORT, 0, port_name));
+        printf("Error: Right large motor (%s) not found\n", ev3_port_name(R_MOTOR_PORT, R_MOTOR_EXT_PORT, 0, port_name));
 		error = true;
     }
+
+	// medium motor
+	if (ev3_search_tacho_plugged_in(M_MOTOR_PORT, M_MOTOR_EXT_PORT, &m_motor, 0)) {
+		if (debug) {
+			printMotor(m_motor);
+			Sleep(300);
+		}
+	} else {
+		printf("Error: Medium motor (%s) not found\n", ev3_port_name(M_MOTOR_PORT, M_MOTOR_EXT_PORT, 0, port_name));
+		error = true;
+	}
 
 	if (error) {
 		fail("Failed initialization - robot is inoperative");
 	}
+
+	_reset();
 }
 
 static void prompt(char *const input) {

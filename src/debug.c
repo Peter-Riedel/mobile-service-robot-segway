@@ -112,18 +112,6 @@ void printMotor(uint8_t sn) {
 	printf("\n");
 }
 
-// TODO: return motor names as string
-const char* getMotorName(uint32_t motor_type) {
-/*
-	switch (motor_type) {
-        case LEGO_EV3_M_MOTOR: return "Central Motor";
-        case LEGO_EV3_L_MOTOR: return "Leg Motors";
-		default: return "Unknown";
-	}
-*/
-	return "";
-}
-
 static bool checkPressed() {
     uint8_t val;
 
